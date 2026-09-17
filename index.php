@@ -1,18 +1,18 @@
 <?php
-session_start();
-if (!isset($_SESSION['cart'])) { $_SESSION['cart'] = []; }
-if (!isset($_COOKIE['username'])) {
-  setcookie("username", "Tria Puspita - 25012049", time()+3600*24, "/");
-}
+require 'bootstrap.php';
+require 'functions.php';
+$title='Produk';
+include 'components/header.php';
 ?>
-<h2>Produk - Toko 25M11</h2>
-<p>Halo, <?= $_COOKIE['username'] ?? 'Tamu' ?> | Keranjang: <?= count($_SESSION['cart']) ?> item</p>
-<a href="?add=1">Tambah Buku Web - 50k</a> | 
-<a href="?add=2">Tambah Mouse - 75k</a> | 
-<a href="cart.php">Lihat Keranjang</a>
-<?php
-if (isset($_GET['add'])) {
-  $_SESSION['cart'][] = $_GET['add'];
-  echo "<p>Produk ditambahkan (pakai SESSION)!</p>";
-}
-?>
+<h3>Produk - Cookie Terakhir: <?= $_COOKIE['last_product'] ?? 'Belum ada' ?></h3>
+<div class="row">
+<?php foreach(getProducts() as $p): ?>
+<div class="col-md-3 mb-3"><div class="card p-3">
+<h1><?= $p['gambar'] ?></h1>
+<h6><?= $p['nama'] ?></h6>
+<p>Rp <?= number_format($p['harga']) ?></p>
+<a href="actions.php?act=add&id=<?= $p['id'] ?>" class="btn btn-primary btn-sm">+ Keranjang</a>
+</div></div>
+<?php endforeach; ?>
+</div>
+<?php include 'components/footer.php'; ?>
