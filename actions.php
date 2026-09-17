@@ -1,20 +1,25 @@
 <?php
-require 'bootstrap.php';
-require 'functions.php';
-$act = $_GET['act'] ?? $_POST['act'] ?? '';
-$id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+require_once __DIR__ . '/bootstrap.php'; 
+require_once __DIR__ . '/functions.php';
+$products = require __DIR__ . '/data/products.php';
 
-if($act=='add' && $id){
-  $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + 1;
-  $_SESSION['flash'] = "Produk ditambahkan ke keranjang (SESSION)!";
-  setcookie("last_product", (string)$id, time()+86400, "/");
-  header("Location: index.php"); exit;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {     
+    header('Location: index.php'); exit; 
 }
-if($act=='remove' && $id){
-  unset($_SESSION['cart'][$id]);
-  header("Location: cart.php"); exit;
+
+$action = $_POST['action'] ?? '';
+$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+
+if ($action === 'add' && $id !== false && isset($products[$id])) {     
+    $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + 1;     
+    setFlash('Produk ditambahkan ke keranjang.');
+} elseif ($action === 'remove' && $id !== false && isset($_SESSION['cart'][$id])) {     
+    unset($_SESSION['cart'][$id]);
+    setFlash('Produk dihapus dari keranjang.');
+} elseif ($action === 'clear') {     
+    $_SESSION['cart'] = [];
+    setFlash('Keranjang dikosongkan.');
+} else {
+    setFlash('Permintaan tidak valid.'); 
 }
-if($act=='clear'){
-  $_SESSION['cart'] = [];
-  header("Location: cart.php"); exit;
-}
+$target = $action === 'add' ? 'index.php' : 'cart.php'; header('Location: ' . $target); exit;
